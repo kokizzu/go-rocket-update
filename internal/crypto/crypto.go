@@ -40,7 +40,9 @@ func GetFileSignature(priv *rsa.PrivateKey, path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	signature, err := rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA256, hash)
+	var opts rsa.PSSOptions
+	opts.SaltLength = rsa.PSSSaltLengthEqualsHash
+	signature, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, hash, &opts)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +55,9 @@ func VerifyFileSignature(pub *rsa.PublicKey, signature []byte, path string) erro
 	if err != nil {
 		return err
 	}
-	err = rsa.VerifyPKCS1v15(pub, crypto.SHA256, hash, signature)
+	var opts rsa.PSSOptions
+	opts.SaltLength = rsa.PSSSaltLengthEqualsHash
+	err = rsa.VerifyPSS(pub, crypto.SHA256, hash, signature, &opts)
 	if err != nil {
 		return err
 	}
